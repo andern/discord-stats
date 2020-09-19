@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Discord Stats</title>
+  </head>
+  <style>
+    body {
+      background-color: whitesmoke;
+    }
+
+    .user-totals {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .user-total {
+      border-radius: 5px;
+      background-color: white;
+      max-height: 120px;
+      padding: 0.75em;
+      margin-top: 2em;
+      margin-right: 1em;
+      display: flex;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .user-total .profile {
+      min-width: 250px;
+    }
+
+    .user-total .profile-info {
+      display: flex;
+    }
+
+    .user-total .avatar {
+      flex-shrink: 0;
+      border-radius: 50%;
+      overflow: hidden;
+      height: 64px;
+      width: 64px;
+    }
+
+    .user-total .avatar > img {
+      height: 64px;
+      width: 64px;
+    }
+
+    .user-total .stats {
+      margin-left: 1em;
+    }
+
+    .user-total .stats .count {
+      color: dimgray;
+      font-size: smaller;
+    }
+
+    .user-total .stats .nick {
+      margin-top: 0.25em;
+      font-size: larger;
+    }
+
+    .user-total .stats .username {
+      color: gray;
+      font-size: medium;
+    }
+
+    .user-total .reactions {
+      margin-top: 0.35em;
+      color: gray;
+      font-size: smaller;
+    }
+
+    .user-total .quote {
+      margin-top: 1.5em;
+      flex-shrink: 1;
+      color: lightslategray;
+      font-size: smaller;
+    }
+  </style>
+  <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.0.0-beta/chart.min.js"></script>
+
+    <UserTotal></UserTotal>
+    <ChannelTotal></ChannelTotal>
+  </body>
+</html>
