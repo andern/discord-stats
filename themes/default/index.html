@@ -5,6 +5,9 @@
     <title>Discord Stats</title>
   </head>
   <style>
+    :root {
+      font-family: Arial;
+    }
     body {
       background-color: whitesmoke;
     }
@@ -19,10 +22,10 @@
       background-color: white;
       max-height: 120px;
       padding: 0.75em;
-      margin-top: 2em;
+      margin-top: 1em;
       margin-right: 1em;
       display: flex;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 1px 1px 0 rgba(0,0,0,0.14), 0 2px 1px -1px rgba(0,0,0,0.12), 0 1px 3px 0 rgba(0,0,0,0.20);
     }
     .user-total .profile {
       min-width: 250px;
@@ -51,7 +54,8 @@
 
     .user-total .stats .count {
       color: dimgray;
-      font-size: smaller;
+      font-family: monospace;
+      font-size: small;
     }
 
     .user-total .stats .nick {
@@ -67,7 +71,8 @@
     .user-total .reactions {
       margin-top: 0.35em;
       color: gray;
-      font-size: smaller;
+      font-family: monospace;
+      font-size: small;
     }
 
     .user-total .quote {
@@ -76,11 +81,43 @@
       color: lightslategray;
       font-size: smaller;
     }
+
+    .server-total {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .server-total .content {
+      padding: 0.75em;
+      background-color: white;
+      border-radius: 5px;
+      overflow: hidden;
+      box-shadow: 0 1px 1px 0 rgba(0,0,0,0.14), 0 2px 1px -1px rgba(0,0,0,0.12), 0 1px 3px 0 rgba(0,0,0,0.20);
+    }
+
+    .server-total .sums .messages {
+      color: dimgray;
+      font-family: monospace;
+      font-size: small;
+    }
+
+    .server-total .sums .reactions {
+      color: gray;
+      font-family: monospace;
+      font-size: small;
+    }
+
+    .server-total .causes {
+    }
+
   </style>
   <body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.0.0-beta/chart.min.js"></script>
 
+    <ServerIntro></ServerIntro>
+    <ServerTotal></ServerTotal>
     <UserTotal></UserTotal>
+    <MostUsed></MostUsed>
     <ChannelTotal></ChannelTotal>
   </body>
 </html>

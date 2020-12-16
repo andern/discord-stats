@@ -6,7 +6,8 @@
   "main": "index.js",
   "dependencies": {
     "dotenv": "^8.2.0",
-    "event-stream": "^4.0.1"
+    "event-stream": "^4.0.1",
+    "multistream": "^4.0.1"
   },
   "devDependencies": {},
   "scripts": {

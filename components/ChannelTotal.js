@@ -30,9 +30,8 @@ export default class ChannelTotal extends Subscriber {
     });
 
     this.on(GUILD_CREATE, evt => {
-      const channel = this.getChannel(evt.d.channel_id);
       evt.d.channels.forEach(channel => {
-        this.channels[channel.id] = this.channels[channel.id] || {};
+        this.channels[channel.id] = this.channels[channel.id] || { id: channel.id, usersMsgCount: {} };
         this.channels[channel.id].name = channel.name;
         this.channels[channel.id].topic = channel.topic;
       });
@@ -74,7 +73,7 @@ export default class ChannelTotal extends Subscriber {
     ${channel.topic || '&nbsp;'}
   </div>
   <div class="activity">
-    <canvas id="${channel.id}-chart"></canvas>
+<!--    <canvas id="${channel.id}-chart"></canvas>
     <script>
       var ctx = document.getElementById('${channel.id}-chart').getContext('2d');
       var myChart = new Chart(ctx, {
@@ -95,7 +94,7 @@ export default class ChannelTotal extends Subscriber {
           }
         }
       });
-    </script>
+    </script> -->
   </div>
 </div>
     `;

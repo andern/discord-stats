@@ -2,7 +2,8 @@ import Subscriber from './Subscriber.js';
 import {
   PRESENCE_UPDATE,
   MESSAGE_CREATE,
-  MESSAGE_REACTION_ADD
+  MESSAGE_REACTION_ADD,
+  MESSAGE_REACTION_REMOVE
 } from '../event-types.js';
 
 export default class UserTotal extends Subscriber {
@@ -11,6 +12,8 @@ export default class UserTotal extends Subscriber {
     this.users = {};
     this.messageAuthors = {};
     this.name = 'UserTotal';
+
+    this.quoteRegexp = /^[a-zA-Z0-9.,!;:'-+? ]{10,30}$/g
 
     this.on(PRESENCE_UPDATE, evt => {
       const user = this.getUser(evt.d.user.id);
@@ -33,7 +36,7 @@ export default class UserTotal extends Subscriber {
       if (user.wordCount == null)    user.wordCount    = 0;
       if (user.msgCount == null)     user.msgCount     = 0;
       if (user.hourActivity == null) user.hourActivity = new Array(24).fill(0);
-      if (evt.d.content.length < 30) user.quote = evt.d.content;
+      if (this.quoteRegexp.test(evt.d.content)) user.quote = evt.d.content;
 
       user.msgCount++;
       user.wordCount += evt.d.content.split(' ').filter(s => s !== '').length;
@@ -47,10 +50,26 @@ export default class UserTotal extends Subscriber {
         user.reactedCount = 0;
       user.reactedCount++;
 
-      const author = this.getUser(this.getAuthorId(evt.d.message_id));
+      const authorId = this.getAuthorId(evt.d.message_id);
+      if (authorId == null) return;
+
+      const author = this.getUser(authorId);
       if (author.reactionCount == null)
-        user.reactionCount = 0;
-      user.reactionCount++;
+        author.reactionCount = 0;
+      author.reactionCount++;
+    });
+
+    this.on(MESSAGE_REACTION_REMOVE, evt => {
+      const user = this.getUser(evt.d.user_id);
+      if (user.reactedCount != null)
+        user.reactedCount--;
+
+      const authorId = this.getAuthorId(evt.d.message_id);
+      if (authorId == null) return;
+
+      const author = this.getUser(authorId);
+      if (author.reactionCount != null)
+        author.reactionCount--;
     });
   }
 
