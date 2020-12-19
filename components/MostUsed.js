@@ -12,7 +12,7 @@ export default class MostUsed extends Subscriber {
     this.users = {};
     this.name = 'MostUsed';
 
-    this.wordRegexp = /(?:^|\s)(\w{4,})(?:[\.,]?\s)/gm;
+    this.wordRegexp = /(\w{5,})(?:,\s|\.\s|\s)/gm;
     this.emojiRegexp = /.*<:([a-zA-Z0-9]+):[0-9]+>.*/g;
 
     this.words = {};
@@ -41,8 +41,10 @@ export default class MostUsed extends Subscriber {
 
     return `
 <div class="most-used">
-  <div class="words">
-    ${topWords}
+  <div class="content">
+    <div class="words">
+      ${topWords}
+    </div>
   </div>
 </div>
     `;

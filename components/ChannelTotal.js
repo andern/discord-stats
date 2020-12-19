@@ -52,11 +52,23 @@ export default class ChannelTotal extends Subscriber {
     return this.channels[id];
   }
 
-  getChannelHTML(channel) {
+  getMostActiveUser(channel) {
     let a = Object.keys(channel.usersMsgCount);
     let b = a.map(key => { return { userId: key, count: channel.usersMsgCount[key] } });
     let c = b.sort((a, b) => b.count - a.count);
-    let mostActive = this.users[c[0].userId];
+    return this.users[c[0].userId];
+  }
+
+  getMostActiveHours(channel) {
+    let a = Object.keys(channel.hourActivity);
+    let b = a.map(key => { return { hour: key, count: channel.hourActivity[key] } });
+    let c = b.sort((a, b) => b.count - a.count);
+    return c.map(a => a.hour).slice(0, 3).join(', ');
+  }
+
+  getChannelHTML(channel) {
+    const mostActive = this.getMostActiveUser(channel);
+    const mostActiveHours = this.getMostActiveHours(channel);
 
     return `
 <div class="channel-total">
@@ -66,42 +78,27 @@ export default class ChannelTotal extends Subscriber {
   <div class="count">
     ${channel.msgCount}
   </div>
-  <div class="mostActive">
+  <div class="most-active">
     ${mostActive.nick != null ? mostActive.nick : mostActive.username}
+  </div>
+  <div class="most-active-hour">
+    ${mostActiveHours}
   </div>
   <div class="topic">
     ${channel.topic || '&nbsp;'}
-  </div>
-  <div class="activity">
-<!--    <canvas id="${channel.id}-chart"></canvas>
-    <script>
-      var ctx = document.getElementById('${channel.id}-chart').getContext('2d');
-      var myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: [${Array.from(Array(24).keys())}],
-          datasets: [{ data: [${channel.hourActivity}] }]
-        },
-        options: {
-          title: { text: 'Activity at hour', display: true },
-          events: [],
-          legend: { display: false },
-          scales: {
-            y: { display: false },
-            xAxes: {
-              gridLines: { display: false }
-            },
-          }
-        }
-      });
-    </script> -->
   </div>
 </div>
     `;
   }
 
   getHTML() {
-    let html = '<div>';
+    let html = '<div class="channel-totals"><div class="content">';
+    html += '<div class="channel-total">';
+    html += '<div>Channel</div>';
+    html += '<div>Msgs</div>';
+    html += '<div>Most active user</div>';
+    html += '<div>Busiest hours</div>';
+    html += '<div>Topic</div></div>';
     let arr =
       Object.keys(this.channels)
       .map(key => this.channels[key])
@@ -111,7 +108,7 @@ export default class ChannelTotal extends Subscriber {
     arr.forEach(channel => {
       html += this.getChannelHTML(channel);
     });
-    html += '</div>';
+    html += '</div></div>';
     return html;
   }
 }

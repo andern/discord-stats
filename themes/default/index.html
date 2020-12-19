@@ -7,26 +7,68 @@
   <style>
     :root {
       font-family: Arial;
+      --color-ground-layer: #2d3848;
+      --color-second-layer: #3a4556;
+      --color-third-layer: #4a5568;
+      --color-bright: #dbe2e8;
+      --color-white: #eeeff1;
+      --color-selected: #63a6a6;
+
+      --color-dim: #a3b6be;
+      --color-very-dim: #60697c;
+      --text-color: #eeeee1;
+
+      --card-shadow: 0 1px 1px 0 rgba(0,0,0,0.14), 0 2px 1px -1px rgba(0,0,0,0.12), 0 1px 3px 0 rgba(0,0,0,0.20);
+      --card-padding: 0.75em;
+      --card-border-radius: 5px;
     }
+
     body {
-      background-color: whitesmoke;
+      background-color: var(--color-ground-layer);
+      color: var(--text-color);
+    }
+
+    .container {
+      margin: 0 auto;
+      max-width: 1212px;
     }
 
     .user-totals {
+      margin-bottom: 1em;
+    }
+
+    .user-totals::before {
+      content: 'Users';
+      padding: 0.5em 1em;
+      font-size: large;
+      border-top-left-radius: var(--card-border-radius);
+      border-top-right-radius: var(--card-border-radius);
+      background-color: var(--color-second-layer);
+    }
+
+    .user-totals .content {
       display: flex;
       flex-wrap: wrap;
+      justify-content: space-between;
+      border-radius: var(--card-border-radius);
+      border-top-left-radius: 0 !important;
+      background-color: var(--color-second-layer);
+      padding: var(--card-padding);
+      box-shadow: var(--card-shadow);
     }
 
     .user-total {
-      border-radius: 5px;
-      background-color: white;
       max-height: 120px;
-      padding: 0.75em;
-      margin-top: 1em;
-      margin-right: 1em;
+      margin-bottom: 0.5em;
+      padding-bottom: 0.5em;
+      justify-content: space-between;
       display: flex;
-      box-shadow: 0 1px 1px 0 rgba(0,0,0,0.14), 0 2px 1px -1px rgba(0,0,0,0.12), 0 1px 3px 0 rgba(0,0,0,0.20);
     }
+
+    .user-total:nth-last-child(n+2) {
+      border-bottom: 1px dashed var(--color-very-dim);
+    }
+
     .user-total .profile {
       min-width: 250px;
     }
@@ -53,9 +95,8 @@
     }
 
     .user-total .stats .count {
-      color: dimgray;
+      color: var(--color-dim);
       font-family: monospace;
-      font-size: small;
     }
 
     .user-total .stats .nick {
@@ -64,60 +105,114 @@
     }
 
     .user-total .stats .username {
-      color: gray;
-      font-size: medium;
+      color: var(--color-very-dim);
     }
 
     .user-total .reactions {
       margin-top: 0.35em;
-      color: gray;
+      color: var(--color-dim);
       font-family: monospace;
-      font-size: small;
     }
 
     .user-total .quote {
-      margin-top: 1.5em;
+      margin-top: 1.25em;
       flex-shrink: 1;
-      color: lightslategray;
-      font-size: smaller;
+      color: var(--color-bright);
     }
 
     .server-total {
       display: flex;
       flex-direction: column;
+      border-radius: var(--card-border-radius);
+      background-color: var(--color-second-layer);
+      padding: var(--card-padding);
+      box-shadow: var(--card-shadow);
+      margin-bottom: 1em;
     }
 
     .server-total .content {
-      padding: 0.75em;
-      background-color: white;
-      border-radius: 5px;
       overflow: hidden;
-      box-shadow: 0 1px 1px 0 rgba(0,0,0,0.14), 0 2px 1px -1px rgba(0,0,0,0.12), 0 1px 3px 0 rgba(0,0,0,0.20);
     }
 
     .server-total .sums .messages {
-      color: dimgray;
+      color: var(--color-dim);
       font-family: monospace;
-      font-size: small;
     }
 
     .server-total .sums .reactions {
-      color: gray;
+      margin-top: 0.35em;
       font-family: monospace;
-      font-size: small;
     }
 
     .server-total .causes {
     }
 
+    .most-used {
+      margin-bottom: 1em;
+    }
+
+    .most-used .content {
+      border-radius: var(--card-border-radius);
+      border-top-left-radius: 0 !important;
+      background-color: var(--color-second-layer);
+      padding: var(--card-padding);
+      box-shadow: var(--card-shadow);
+    }
+
+    .most-used::before {
+      content: 'Words';
+      padding: 0.5em 1em;
+      font-size: large;
+      border-top-left-radius: var(--card-border-radius);
+      border-top-right-radius: var(--card-border-radius);
+      background-color: var(--color-second-layer);
+    }
+
+    .channel-totals .content {
+      border-radius: var(--card-border-radius);
+      background-color: var(--color-second-layer);
+      padding: var(--card-padding);
+      box-shadow: var(--card-shadow);
+    }
+
+    .channel-totals::before {
+      content: 'Channels';
+      padding: 0.5em 1em;
+      font-size: large;
+      border-top-left-radius: var(--card-border-radius);
+      border-top-right-radius: var(--card-border-radius);
+      background-color: var(--color-second-layer);
+    }
+
+    .channel-total {
+      display: grid;
+      /* grid-template-columns: 25% 4em 10em 2em auto; */
+      grid-template-columns: 20% 8% 13% 10% auto;
+    }
+
+    .channel-total:nth-child(even) {
+      backdrop-filter: brightness(92%);
+    }
+
+    .channel-total > div {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
   </style>
   <body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.0.0-beta/chart.min.js"></script>
+    <script>
+      Chart.defaults.color = '#60697c';
+    </script>
 
-    <ServerIntro></ServerIntro>
-    <ServerTotal></ServerTotal>
-    <UserTotal></UserTotal>
-    <MostUsed></MostUsed>
-    <ChannelTotal></ChannelTotal>
+    <div class="container">
+      <ServerIntro></ServerIntro>
+      <ServerTotal></ServerTotal>
+      <UserTotal></UserTotal>
+      <MostUsed></MostUsed>
+      <ChannelTotal></ChannelTotal>
+    </div>
   </body>
 </html>

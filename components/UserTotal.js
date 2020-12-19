@@ -13,7 +13,7 @@ export default class UserTotal extends Subscriber {
     this.messageAuthors = {};
     this.name = 'UserTotal';
 
-    this.quoteRegexp = /^[a-zA-Z0-9.,!;:'-+? ]{10,30}$/g
+    this.quoteRegexp = /^[\w.,!;:'"%-+? ]{10,30}$/gu
 
     this.on(PRESENCE_UPDATE, evt => {
       const user = this.getUser(evt.d.user.id);
@@ -162,7 +162,7 @@ export default class UserTotal extends Subscriber {
   }
 
   getHTML() {
-    let html = '<div class="user-totals">';
+    let html = '<div class="user-totals"><div class="content">';
     let arr =
       Object.keys(this.users)
       .map(key => this.users[key])
@@ -172,7 +172,7 @@ export default class UserTotal extends Subscriber {
     arr.forEach(user => {
       html += this.getUserHTML(user);
     });
-    html += '</div>';
+    html += '</div></div>';
     return html;
   }
 }
