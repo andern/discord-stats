@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import fs from 'fs';
+import zlib from 'zlib';
 import es from 'event-stream';
 import MultiStream from 'multistream';
 
@@ -17,6 +18,13 @@ router.register(new ChannelTotal);
 router.register(new ServerTotal);
 router.register(new MostUsed);
 
+function createReadStreamFromOptionallyGzippedFile(path) {
+  let stream = fs.createReadStream(path);
+  if (path.endsWith('.gz'))
+    stream = stream.pipe(zlib.createGunzip());
+  return stream;
+}
+
 fs.readdir(process.env.LOGDIR, function (err, files) {
   if (err != null) {
     console.log(`Failed to read log dir ${process.env.LOGDIR}: ${err}`);
@@ -24,7 +32,7 @@ fs.readdir(process.env.LOGDIR, function (err, files) {
   }
 
   const rstream = new MultiStream(
-    files.map(file => fs.createReadStream(`${process.env.LOGDIR}${file}`))
+    files.map(file => createReadStreamFromOptionallyGzippedFile(`${process.env.LOGDIR}${file}`))
   );
   rstream.pipe(es.split()).pipe(es.mapSync(line => {
     try {
