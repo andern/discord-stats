@@ -6,35 +6,34 @@ import {
   MESSAGE_REACTION_REMOVE
 } from '../event-types.js';
 
+const WORD_REGEXP = /(\w{5,})(?:,\s|\.\s|\s)/gm;
+
 export default class MostUsed extends Subscriber {
   constructor() {
     super();
-    this.users = {};
     this.name = 'MostUsed';
+    this.state.users = {};
+    this.state.words = {};
 
-    this.wordRegexp = /(\w{5,})(?:,\s|\.\s|\s)/gm;
-    this.emojiRegexp = /.*<:([a-zA-Z0-9]+):[0-9]+>.*/g;
-
-    this.words = {};
     this.on(MESSAGE_CREATE, evt => {
-      let matches = (evt.d.content.match(this.wordRegexp) || []).map(e => e.replace(evt.d.content, '$1'));
+      let matches = (evt.d.content.match(WORD_REGEXP) || []).map(e => e.replace(evt.d.content, '$1'));
       matches.forEach(word => {
         let lower = word.toLowerCase().trim();
-        if (this.words[lower] == null) this.words[lower] = 0;
-        this.words[lower]++;
+        if (this.state.words[lower] == null) this.state.words[lower] = 0;
+        this.state.words[lower]++;
       });
     });
   }
 
   getHTML() {
     const topWords =
-      Object.keys(this.words)
-      .sort((a, b) => this.words[b] - this.words[a])
+      Object.keys(this.state.words)
+      .sort((a, b) => this.state.words[b] - this.state.words[a])
       .slice(0, 5)
       .map(w => `
 <div class="word">
   <span class="word">${w}</span>
-  <span class="count">${this.words[w]}</span>
+  <span class="count">${this.state.words[w]}</span>
 </div>
       `)
       .join('');

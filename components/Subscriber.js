@@ -1,6 +1,7 @@
 export default class Subscriber {
   constructor() {
     this.handlers = {};
+    this.state = {};
   }
 
   on(eventType, handlerFunc) {

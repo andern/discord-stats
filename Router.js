@@ -1,18 +1,14 @@
-import { performance } from 'perf_hooks';
-
 export default class Router {
   constructor() {
     this.routes = {};
     this.consumers = [];
-
-    this.timeSpent = {};
   }
 
   register(consumer) {
     this.consumers.push(consumer);
-    Object.keys(consumer.handlers).forEach(type => {
-      this.routes[type] = this.routes[type] || [];
-      this.routes[type].push(consumer);
+    Object.keys(consumer.handlers).forEach(eventType => {
+      this.routes[eventType] = this.routes[eventType] || [];
+      this.routes[eventType].push(consumer);
     });
   }
 
@@ -29,11 +25,18 @@ export default class Router {
   }
 
   handle(handler, evt) {
-    const t0 = performance.now();
     handler.handle(evt);
-    const t1 = performance.now();
+  }
 
-    this.timeSpent[handler.name] = (this.timeSpent[handler.name] || 0) + (t1 - t0);
-    // this.timeSpent[evt.t] = (this.timeSpent[evt.t] || 0) + (t1 - t0);
+  getStates() {
+    return Object.fromEntries(
+      this.consumers.map(c => [c.name, c.state])
+    );
+  }
+
+  loadStates(states) {
+    for (const [consumerName, state] of Object.entries(states)) {
+      this.consumers.find(c => c.name === consumerName).state = state;
+    }
   }
 }

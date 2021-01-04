@@ -6,14 +6,14 @@ import {
   MESSAGE_REACTION_REMOVE
 } from '../event-types.js';
 
+const QUOTE_REGEXP = /^[\w.,!;:'"%-+? ]{10,30}$/gu;
+
 export default class UserTotal extends Subscriber {
   constructor() {
     super();
-    this.users = {};
-    this.messageAuthors = {};
     this.name = 'UserTotal';
-
-    this.quoteRegexp = /^[\w.,!;:'"%-+? ]{10,30}$/gu
+    this.state.users = {};
+    this.state.messageAuthors = {};
 
     this.on(PRESENCE_UPDATE, evt => {
       const user = this.getUser(evt.d.user.id);
@@ -36,7 +36,7 @@ export default class UserTotal extends Subscriber {
       if (user.wordCount == null)    user.wordCount    = 0;
       if (user.msgCount == null)     user.msgCount     = 0;
       if (user.hourActivity == null) user.hourActivity = new Array(24).fill(0);
-      if (this.quoteRegexp.test(evt.d.content)) user.quote = evt.d.content;
+      if (QUOTE_REGEXP.test(evt.d.content)) user.quote = evt.d.content;
 
       user.msgCount++;
       user.wordCount += evt.d.content.split(' ').filter(s => s !== '').length;
@@ -74,30 +74,31 @@ export default class UserTotal extends Subscriber {
   }
 
   addAuthor(messageId, authorId) {
-    this.messageAuthors = this.messageAuthors || {};
-    this.messageAuthors[messageId] = authorId;
+    this.state.messageAuthors = this.state.messageAuthors || {};
+    this.state.messageAuthors[messageId] = authorId;
 
-    this.messagesToDelete = this.messagesToDelete || [];
-    this.messagesToDelete.push(messageId);
+    this.state.messagesToDelete = this.state.messagesToDelete || [];
+    this.state.messagesToDelete.push(messageId);
 
-    if (this.messagesToDelete.length > 200000) {
-      this.messagesToDelete.splice(0, 100000);
+    if (this.state.messagesToDelete.length > 200000) {
+      this.state.messagesToDelete.splice(0, 100000)
+        .forEach(id => delete this.state.messageAuthors[id]);
     }
   }
 
   getAuthorId(messageId) {
-    return this.messageAuthors[messageId];
+    return this.state.messageAuthors[messageId];
   }
 
   getUser(id) {
-    if (this.users[id] == null) {
-      this.users[id] = { id };
+    if (this.state.users[id] == null) {
+      this.state.users[id] = { id };
     }
-    return this.users[id];
+    return this.state.users[id];
   }
 
   getAvatarUrl(id) {
-    const u = this.users[id];
+    const u = this.state.users[id];
     if (u == null || u.avatarId == null)
       return null;
     return `https://cdn.discordapp.com/avatars/${u.id}/${u.avatarId}.png`
@@ -164,8 +165,8 @@ export default class UserTotal extends Subscriber {
   getHTML() {
     let html = '<div class="user-totals"><div class="content">';
     let arr =
-      Object.keys(this.users)
-      .map(key => this.users[key])
+      Object.keys(this.state.users)
+      .map(key => this.state.users[key])
       .filter(user => user.username != null);
 
     arr.sort((a, b) => { return b.msgCount - a.msgCount });

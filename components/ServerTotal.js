@@ -1,56 +1,51 @@
 import Subscriber from './Subscriber.js';
 import {
   GUILD_CREATE,
-  PRESENCE_UPDATE,
   MESSAGE_CREATE,
   MESSAGE_REACTION_ADD
 } from '../event-types.js';
 
+const EMOJI_REGEXP = /.*<:([a-zA-Z0-9]+):[0-9]+>.*/g;
+
 export default class ServerTotal extends Subscriber {
   constructor() {
     super();
-    this.day = 0;
     this.name = 'ServerTotal';
-    this.emojiRegexp = /.*<:([a-zA-Z0-9]+):[0-9]+>.*/g;
-
-    this.on(PRESENCE_UPDATE, evt => {
-      this.statusUpdates = this.statusUpdates || 0;
-      this.statusUpdates++;
-    });
+    this.state.day = 0;
 
     this.on(MESSAGE_CREATE, evt => {
       let day = parseInt(new Date(evt.d.timestamp).getTime() / 86400000);
-      if (day > this.day) {
-        this.day = day;
-        this.days = this.days || 0;
-        this.days++;
+      if (day > this.state.day) {
+        this.state.day = day;
+        this.state.days = this.state.days || 0;
+        this.state.days++;
       }
 
-      this.words = this.words || 0;
-      this.words += evt.d.content.split(' ').filter(s => s !== '').length;
+      this.state.words = this.state.words || 0;
+      this.state.words += evt.d.content.split(' ').filter(s => s !== '').length;
 
-      this.messages = this.messages || 0;
-      this.messages++;
+      this.state.messages = this.state.messages || 0;
+      this.state.messages++;
 
-      this.emojiUses = this.emojiUses || 0;
-      if (this.emojiRegexp.test(evt.d.content)) {
-        this.emojiUses++;
+      this.state.emojiUses = this.state.emojiUses || 0;
+      if (EMOJI_REGEXP.test(evt.d.content)) {
+        this.state.emojiUses++;
       }
     });
 
     this.on(MESSAGE_REACTION_ADD, evt => {
-      this.reactions = this.reactions || 0;
-      this.reactions++;
+      this.state.reactions = this.state.reactions || 0;
+      this.state.reactions++;
     });
 
     this.on(GUILD_CREATE, evt => {
-      this.emojiUrl = this.getEmojiUrl(evt.d.emojis[0].id);
-      this.emojis = evt.d.emojis.length;
-      this.members = evt.d.member_count;
-      this.channels = evt.d.channels.length;
-      this.guildName = evt.d.name;
-      this.guildIconId = evt.d.icon;
-      this.guildId = evt.d.id;
+      this.state.emojiUrl = this.getEmojiUrl(evt.d.emojis[0].id);
+      this.state.emojis = evt.d.emojis.length;
+      this.state.members = evt.d.member_count;
+      this.state.channels = evt.d.channels.length;
+      this.state.guildName = evt.d.name;
+      this.state.guildIconId = evt.d.icon;
+      this.state.guildId = evt.d.id;
     });
   }
 
@@ -65,35 +60,32 @@ export default class ServerTotal extends Subscriber {
   getHTML() {
     return `
 <div class="server-total">
-  <h3>Discord Stats for ${this.guildName}</h3>
+  <h3>Discord Stats for ${this.state.guildName}</h3>
   <div class="content">
     Generated at ${new Date().toISOString().substring(0, 19).replace('T', ' ')}
     <div class="icon">
       <img
-        src="${this.getGuildIconUrl(this.guildId, this.guildIconId)}"
-        alt="${this.guildName}"
+        src="${this.getGuildIconUrl(this.state.guildId, this.state.guildIconId)}"
+        alt="${this.state.guildName}"
       ></img>
     </div>
 
     <div class="sums">
       <div class="messages">
-        ${this.messages} msgs &bull; ${this.words} words
+        ${this.state.messages} msgs &bull; ${this.state.words} words
       </div>
-      <!-- <div class="statusUpdates">
-        ${this.statusUpdates} status updates
-      </div> -->
       <div class="reactions">
-        ${this.reactions == null ? 0 : this.reactions} <span alt="Reactions">&#128077;</span>
+        ${this.state.reactions == null ? 0 : this.state.reactions} <span alt="Reactions">&#128077;</span>
         &bull;
-        ${this.emojiUses == null ? 0 : this.emojiUses} <span alt="Emoji Uses"><img src="${this.emojiUrl}" style="width: 1em; height: 1em; vertical-align:middle;"></img></span>
+        ${this.state.emojiUses == null ? 0 : this.state.emojiUses} <span alt="Emoji Uses"><img src="${this.state.emojiUrl}" style="width: 1em; height: 1em; vertical-align:middle;"></img></span>
       </div>
     </div>
     <div class="causes">
-      By ${this.members} members on ${this.channels} channels over ${this.days} days
+      By ${this.state.members} members on ${this.state.channels} channels over ${this.state.days} days
     </div>
   </div>
 <!--  <div class="emojis">
-    ${this.emojis} emojis
+    ${this.state.emojis} emojis
   </div> -->
 </div>
     `;

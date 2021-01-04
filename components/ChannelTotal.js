@@ -7,9 +7,9 @@ import {
 export default class ChannelTotal extends Subscriber {
   constructor() {
     super();
-    this.channels = {};
-    this.users = {};
     this.name = 'ChannelTotal';
+    this.state.channels = {};
+    this.state.users = {};
 
     this.on(MESSAGE_CREATE, evt => {
       const user = this.getUser(evt.d.author.id);
@@ -31,32 +31,32 @@ export default class ChannelTotal extends Subscriber {
 
     this.on(GUILD_CREATE, evt => {
       evt.d.channels.forEach(channel => {
-        this.channels[channel.id] = this.channels[channel.id] || { id: channel.id, usersMsgCount: {} };
-        this.channels[channel.id].name = channel.name;
-        this.channels[channel.id].topic = channel.topic;
+        this.state.channels[channel.id] = this.state.channels[channel.id] || { id: channel.id, usersMsgCount: {} };
+        this.state.channels[channel.id].name = channel.name;
+        this.state.channels[channel.id].topic = channel.topic;
       });
     });
   }
 
   getUser(id) {
-    if (this.users[id] == null) {
-      this.users[id] = { id };
+    if (this.state.users[id] == null) {
+      this.state.users[id] = { id };
     }
-    return this.users[id];
+    return this.state.users[id];
   }
 
   getChannel(id) {
-    if (this.channels[id] == null) {
-      this.channels[id] = { id, usersMsgCount: {} };
+    if (this.state.channels[id] == null) {
+      this.state.channels[id] = { id, usersMsgCount: {} };
     }
-    return this.channels[id];
+    return this.state.channels[id];
   }
 
   getMostActiveUser(channel) {
     let a = Object.keys(channel.usersMsgCount);
     let b = a.map(key => { return { userId: key, count: channel.usersMsgCount[key] } });
     let c = b.sort((a, b) => b.count - a.count);
-    return this.users[c[0].userId];
+    return this.state.users[c[0].userId];
   }
 
   getMostActiveHours(channel) {
@@ -100,8 +100,8 @@ export default class ChannelTotal extends Subscriber {
     html += '<div>Busiest hours</div>';
     html += '<div>Topic</div></div>';
     let arr =
-      Object.keys(this.channels)
-      .map(key => this.channels[key])
+      Object.keys(this.state.channels)
+      .map(key => this.state.channels[key])
       .filter(channel => channel.msgCount != null);
 
     arr.sort((a, b) => { return b.msgCount - a.msgCount });
