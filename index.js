@@ -17,7 +17,6 @@ router.register(new ChannelTotal);
 router.register(new ServerTotal);
 router.register(new MostUsed);
 
-fs.mkdirSync(process.env.SNAPSHOTDIR, { recursive: true });
 readDir(process.env.LOGDIR);
 
 function createReadStreamFromPossiblyGzippedFile(path) {
@@ -29,22 +28,29 @@ function createReadStreamFromPossiblyGzippedFile(path) {
 
 async function readDir(dirpath) {
   const files = fs.readdirSync(dirpath);
-  const snapshots = fs.readdirSync(process.env.SNAPSHOTDIR);
+  const snapshot = await readSnapshot();
 
   let i = 0;
-  while (snapshots[i] === `__${files[i]}`) i++;
+  if (snapshot.files == null || snapshot.files.length === 0) {
+    log(`Snapshot ${process.env.SNAPSHOT} not found or empty; ignoring`)
+  } else if (snapshot.files.length > files.length) {
+    log(`Snapshot ${process.env.SNAPSHOT} is inconsistent with input; ignoring`)
+  } else {
+    while (snapshot.files[i] === files[i]) i++;
+  }
 
-  if (i > 0)
-    router.loadStates(await readSnapshot(`__${files[i-1]}`));
+  delete snapshot.files;
+  router.loadStates(snapshot);
 
   for (; i < files.length; i++) {
-    await readFile(files[i]);
+    if (i == files.length - 1) {
+      const newSnapshot = router.getStates();
+      newSnapshot.files = files.slice(0, files.length - 1);
+      await fs.promises.writeFile(process.env.SNAPSHOT, JSON.stringify(newSnapshot, null, 4));
+      log(`Writing snapshot ${process.env.SNAPSHOT}`);
+    }
 
-    if (i == files.length - 1) continue;
-    await fs.promises.writeFile(
-      `${process.env.SNAPSHOTDIR}/__${files[i]}`,
-      JSON.stringify(router.getStates(), null, 4)
-    );
+    await readFile(files[i]);
   }
 
   writeHTML(router.consumers);
@@ -58,16 +64,21 @@ function readFile(filename) {
         if (line.trim() !== '')
           router.route(JSON.parse(line));
       } catch (e) {
-        console.log(`Failed to handle line: ${line}: ${e}`);
+        log(`Failed to handle line: ${line}: ${e}`);
       }
     }).on('error', err => {
-      console.log(`Error while reading file ${filename}`, err);
+      log(`Error while reading file ${filename}`, err);
       reject();
     }).on('end', async () => {
-      // console.log(filename);
+      log(`Read file ${filename}`);
       resolve();
     }));
   });
+}
+
+function log(str) {
+  if (process.env.VERBOSE === 'true')
+    console.log(str);
 }
 
 async function writeHTML(consumers) {
@@ -82,10 +93,10 @@ async function writeHTML(consumers) {
   await fs.promises.writeFile(`${process.env.OUTPUT}/index.html`, html);
 }
 
-async function readSnapshot(filename) {
+async function readSnapshot() {
   try {
     return JSON.parse(
-      await fs.promises.readFile(`${process.env.SNAPSHOTDIR}/${filename}`)
+      await fs.promises.readFile(process.env.SNAPSHOT)
     );
   } catch {
     return {};
