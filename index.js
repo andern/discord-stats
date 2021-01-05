@@ -28,30 +28,33 @@ function createReadStreamFromPossiblyGzippedFile(path) {
 
 async function readDir(dirpath) {
   const files = fs.readdirSync(dirpath);
-  const snapshot = await readSnapshot();
+  if (files.length === 0) {
+    log(`Directory ${process.env.LOGDIR} empty; exiting`);
+    return;
+  }
+
+  const snapshot = await readSnapshot(files.length);
 
   let i = 0;
-  if (snapshot.files == null || snapshot.files.length === 0) {
-    log(`Snapshot ${process.env.SNAPSHOT} not found or empty; ignoring`)
-  } else if (snapshot.files.length > files.length) {
-    log(`Snapshot ${process.env.SNAPSHOT} is inconsistent with input; ignoring`)
-  } else {
+  if (snapshot != null) {
     while (snapshot.files[i] === files[i]) i++;
+    router.loadStates(snapshot.states);
   }
 
-  delete snapshot.files;
-  router.loadStates(snapshot);
+  let iBeforeReading = i;
+  for (; i < files.length - 1; i++) await readFile(files[i]);
 
-  for (; i < files.length; i++) {
-    if (i == files.length - 1) {
-      const newSnapshot = router.getStates();
-      newSnapshot.files = files.slice(0, files.length - 1);
-      await fs.promises.writeFile(process.env.SNAPSHOT, JSON.stringify(newSnapshot, null, 4));
-      log(`Writing snapshot ${process.env.SNAPSHOT}`);
-    }
+  const newSnapshot = {
+    states: router.getStates(),
+    files: files.slice(0, files.length - 1)
+  };
 
-    await readFile(files[i]);
+  if (iBeforeReading !== i) { // Only write snapshot if we actually read files
+    await fs.promises.writeFile(process.env.SNAPSHOT, JSON.stringify(newSnapshot, null, 4));
+    log(`Written snapshot to ${process.env.SNAPSHOT}`);
   }
+
+  await readFile(files[i]);
 
   writeHTML(router.consumers);
 }
@@ -93,12 +96,20 @@ async function writeHTML(consumers) {
   await fs.promises.writeFile(`${process.env.OUTPUT}/index.html`, html);
 }
 
-async function readSnapshot() {
+async function readSnapshot(numOfFiles) {
   try {
-    return JSON.parse(
+    const snapshot = JSON.parse(
       await fs.promises.readFile(process.env.SNAPSHOT)
     );
-  } catch {
-    return {};
-  }
+    log(`Read snapshot from ${process.env.SNAPSHOT}`);
+    if (snapshot.files == null || snapshot.files.length === 0) {
+      log(`Snapshot ${process.env.SNAPSHOT} not found or empty; ignoring`)
+    } else if (snapshot.files.length > numOfFiles) {
+      log(`Snapshot ${process.env.SNAPSHOT} is inconsistent with input; ignoring`)
+    } else {
+      return snapshot;
+    }
+  } catch {}
+
+  return null;
 }
