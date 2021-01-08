@@ -135,7 +135,7 @@ export default class UserTotal extends Subscriber {
     </div>
   </div>
   <div class="activity">
-    <canvas id="${user.id}-chart" height="120"></canvas>
+    <canvas id="${user.id}-chart" class="chart"></canvas>
     <script>
       var ctx = document.getElementById('${user.id}-chart').getContext('2d');
       var myChart = new Chart(ctx, {

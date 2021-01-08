@@ -8,6 +8,7 @@ import UserTotal from './components/UserTotal.js';
 import ChannelTotal from './components/ChannelTotal.js';
 import ServerTotal from './components/ServerTotal.js';
 import MostUsed from './components/MostUsed.js';
+import RecentActivity from './components/RecentActivity.js';
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ router.register(new UserTotal);
 router.register(new ChannelTotal);
 router.register(new ServerTotal);
 router.register(new MostUsed);
+router.register(new RecentActivity);
 
 readDir(process.env.LOGDIR);
 

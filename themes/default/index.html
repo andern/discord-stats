@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <title>Discord Stats</title>
+    <link rel="stylesheet" href="./uPlot.min.css">
   </head>
   <style>
     :root {
@@ -120,6 +121,10 @@
       color: var(--color-bright);
     }
 
+    .user-total .activity .chart {
+      height: 120px;
+    }
+
     .server-total {
       display: flex;
       flex-direction: column;
@@ -200,16 +205,47 @@
       text-overflow: ellipsis;
     }
 
+    .recent-activity {
+      margin-bottom: 1em;
+    }
+
+    .recent-activity .content {
+      border-radius: var(--card-border-radius);
+      border-top-left-radius: 0 !important;
+      background-color: var(--color-second-layer);
+      padding: var(--card-padding);
+      box-shadow: var(--card-shadow);
+    }
+
+    .recent-activity::before {
+      content: 'Recent Activity';
+      padding: 0.5em 1em;
+      font-size: large;
+      border-top-left-radius: var(--card-border-radius);
+      border-top-right-radius: var(--card-border-radius);
+      background-color: var(--color-second-layer);
+    }
+
+/*
+    #recent-activity-chart {
+      height: 140px;
+      width: 50%;
+    }
+*/
   </style>
   <body>
+    <script src="./uPlot.iife.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.0.0-beta/chart.min.js"></script>
     <script>
+      window.axesColor = '#dbe2e8';
+      window.plotColor = '#60697c';
       Chart.defaults.color = '#60697c';
     </script>
 
     <div class="container">
       <ServerIntro></ServerIntro>
       <ServerTotal></ServerTotal>
+      <RecentActivity></RecentActivity>
       <UserTotal></UserTotal>
       <MostUsed></MostUsed>
       <ChannelTotal></ChannelTotal>
