@@ -135,27 +135,41 @@ export default class UserTotal extends Subscriber {
     </div>
   </div>
   <div class="activity">
-    <canvas id="${user.id}-chart" class="chart"></canvas>
+    <div id="${user.id}-chart"></div>
     <script>
-      var ctx = document.getElementById('${user.id}-chart').getContext('2d');
-      var myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: [${Array.from(Array(24).keys())}],
-          datasets: [{ data: [${user.hourActivity}] }]
+      const container${user.id} = document.getElementById('${user.id}-chart');
+      const data${user.id} = [
+        [${Array.from(Array(24).keys())}],
+        [${user.hourActivity}]
+      ];
+      const options${user.id} = {
+        width: 220,
+        height: 140,
+        class: 'spark',
+				padding: [0,5,0,5],
+        cursor: { show: false },
+        legend: { show: false },
+        scales: {
+          x: { time: false },
         },
-        options: {
-          title: { text: 'Activity at hour', display: false },
-          events: [],
-          legend: { display: false },
-          scales: {
-            y: { display: false },
-            xAxes: {
-              gridLines: { display: false }
-            },
+        axes: [
+          {
+            stroke: window.axesColor,
+          },
+          {
+            show: false,
+            stroke: window.axesColor,
+          },
+        ],
+        series: [
+          {},
+          {
+            stroke: window.axesColor,
+            fill: window.plotColor
           }
-        }
-      });
+        ],
+      };
+      new uPlot(options${user.id}, data${user.id}, container${user.id});
     </script>
   </div>
 </div>
